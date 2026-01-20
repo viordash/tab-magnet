@@ -125,16 +125,18 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
     }
 
     const needMoveToLeft = currentIndex > targetIndex;
-    if (needMoveToLeft) {
+    if (currentIndex == targetIndex) {
+        await vscode.commands.executeCommand('workbench.action.keepEditor');
+    } else if (needMoveToLeft) {
         const steps = currentIndex - targetIndex;
-        if (steps >= 0) {
+        if (steps > 0) {
             console.log(`Move Tab to the left to "${steps}" steps`);
             await vscode.commands.executeCommand('moveActiveEditor', { to: 'left', by: 'tab', value: steps });
             await vscode.commands.executeCommand('workbench.action.keepEditor');
         }
     } else {
         const steps = (targetIndex - 1) - currentIndex;
-        if (steps >= 0) {
+        if (steps > 0) {
             console.log(`Move Tab to the right to "${steps}" steps`);
             await vscode.commands.executeCommand('moveActiveEditor', { to: 'right', by: 'tab', value: steps });
             await vscode.commands.executeCommand('workbench.action.keepEditor');
