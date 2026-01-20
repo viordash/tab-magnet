@@ -1,71 +1,49 @@
-# tab-magnet README
+# Tab Magnet
 
-This is the README for your extension "tab-magnet". After writing up a brief description, we recommend including the following sections.
+**Tab Magnet** automatically keeps your related file tabs together.
+
+When you work with languages that use pairs of files (like C++ Header/Source, or Angular Component/Template), opening one file usually leaves its pair scattered somewhere else in the tab bar. **Tab Magnet** solves this by automatically moving the active tab right next to its related file.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+*   **Automatic Grouping:** Just open a file or switch to an existing tab. If a related file is found in the current group, they will "snap" together.
+*   **Smart Positioning:** The extension knows where files usually belong. For example, Header files (`.h`) are placed to the **Left** of Source files (`.c`), while CSS files are placed to the **Right** of HTML/JS files.
+*   **Zero Configuration:** Works out of the box.
 
-For example if there is an image subfolder under your extension project workspace:
+## Supported File Pairs
 
-\!\[feature X\]\(images/feature-x.png\)
+Currently, Tab Magnet supports the following associations:
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+### C / C++
+*   `.c` ↔ `.h`
+*   `.cpp` ↔ `.hpp` / `.h` / `.hxx`
+*   `.cc` ↔ `.hh`
+
+### Web Development
+*   `.js` / `.ts` ↔ `.html` ↔ `.css`
+*   `.spec.ts` (Tests) are grouped with their source files.
+
+### C# / .NET
+*   `.cs` ↔ `.cshtml` (Razor Pages)
+*   `.cs` ↔ `.razor` (Blazor)
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+No special requirements. Just install and enjoy organized tabs.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+Currently, there are no configurable settings. The extension uses opinionated defaults for file positioning (e.g., Headers on the right).
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+*   The extension works within the current **Tab Group**. It does not move tabs between split editors.
+*   Ordering is triggered on `onDidChangeActiveTextEditor`. If you manually drag a tab away, it might snap back if you click it again while its pair is open.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Initial release.
+*   Core functionality implemented.
+*   Support for C/C++, Web (JS/TS/HTML/CSS), and C# (.cs/Razor).
