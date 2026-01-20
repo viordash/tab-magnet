@@ -113,7 +113,7 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
             targetIndex = pairIndex + 1;
             break;
         default:
-            targetIndex = pairIndex - 1;
+            targetIndex = pairIndex;
             break;
     }
 
