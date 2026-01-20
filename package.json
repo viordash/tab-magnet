@@ -3,11 +3,23 @@
   "displayName": "Tab Magnet",
   "description": "Automatically groups related file tabs (e.g., .c/.h, .cpp/.hpp, .js/.css) side-by-side active editor.",
   "version": "0.0.1",
+  "publisher": "viordash",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/viordash/tab-magnet"
+  },
   "engines": {
     "vscode": "^1.108.1"
   },
   "categories": [
     "Other"
+  ],
+  "keywords": [
+    "tabs",
+    "grouping",
+    "cpp",
+    "c++",
+    "header"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -38,5 +50,6 @@
     "typescript": "^5.9.3",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2"
-  }
+  },
+  "icon": "icon.png"
 }
