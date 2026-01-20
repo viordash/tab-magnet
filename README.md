@@ -1,4 +1,4 @@
-# Tab Magnet
+# vscode extension Tab Magnet
 
 **Tab Magnet** automatically keeps your related file tabs together.
 
