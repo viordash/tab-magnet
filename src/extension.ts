@@ -50,19 +50,11 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
         return;
     }
 
-    const currentExt = path.extname(doc.fileName).toLowerCase();
-    const supportedFile = PAIR_EXTENSIONS[currentExt];
-
-    if (!supportedFile) {
-        return;
-    }
-
-    const currentBasename = path.basename(doc.fileName, currentExt);
-
     const activeTabGroup = vscode.window.tabGroups.activeTabGroup;
     if (!activeTabGroup) {
         return;
     }
+
 
     const currentTab = activeTabGroup.tabs.find(t =>
         t.input instanceof vscode.TabInputText &&
@@ -72,6 +64,16 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
     if (!currentTab) {
         return;
     }
+
+    const currentExt = path.extname(doc.fileName).toLowerCase();
+    const supportedFile = PAIR_EXTENSIONS[currentExt];
+
+    if (!supportedFile) {
+        return;
+    }
+
+    const currentDir = path.dirname(doc.fileName);
+    const currentFullname = path.join(currentDir, path.basename(doc.fileName, currentExt));
 
     let pairTab: vscode.Tab | undefined;
     let position: Position | undefined;
@@ -86,9 +88,14 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
             continue;
         }
         const tabPath = tab.input.uri.fsPath;
+        const tabDir = path.dirname(tabPath);
+        if (tabDir !== currentDir) {
+            continue;
+        }
+
         const tabExt = path.extname(tabPath).toLowerCase();
-        const tabBasename = path.basename(tabPath, tabExt);
-        if (tabBasename !== currentBasename) {
+        const tabFullname = path.join(tabDir, path.basename(tabPath, tabExt));
+        if (tabFullname !== currentFullname) {
             continue;
         }
         const pair = supportedFile.find(pair => pair[0] == tabExt);
