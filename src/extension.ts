@@ -1,14 +1,14 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-enum Position {
+export enum Position {
     Left,
     Right
 }
 
-type Pair = [string, Position];
+export type Pair = [string, Position];
 
-const PAIR_EXTENSIONS: { [key: string]: Pair[] } = {
+export const PAIR_EXTENSIONS: { [key: string]: Pair[] } = {
     // C/C++
     '.c': [['.h', Position.Right]],
     '.h': [['.c', Position.Left], ['.cpp', Position.Left]],
@@ -43,6 +43,60 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(disposable);
 }
 
+
+export function getPosition(supportedFile: Pair[], currentPath: string, tabPath: string): Position | undefined {
+    const currentExt = path.extname(currentPath).toLowerCase();
+    const currentDir = path.dirname(currentPath);
+    const currentFullname = path.join(currentDir, path.basename(currentPath, currentExt));
+
+    const tabDir = path.dirname(tabPath);
+    if (tabDir !== currentDir) {
+        return;
+    }
+
+    const tabExt = path.extname(tabPath).toLowerCase();
+    const tabFullname = path.join(tabDir, path.basename(tabPath, tabExt));
+    if (tabFullname !== currentFullname) {
+        return;
+    }
+    const pair = supportedFile.find(pair => pair[0] == tabExt);
+    if (!pair) {
+        return;
+    }
+    return pair[1];
+}
+
+export async function moveTab(tabGroup: vscode.TabGroup, currentTab: vscode.Tab, pairTab: vscode.Tab, position: Position) {
+    const currentIndex = tabGroup.tabs.indexOf(currentTab);
+    const pairIndex = tabGroup.tabs.indexOf(pairTab);
+
+    let targetIndex;
+    switch (position) {
+        case Position.Left:
+            targetIndex = pairIndex + 1;
+            break;
+        default:
+            targetIndex = pairIndex;
+            break;
+    }
+
+    const needMoveToLeft = currentIndex > targetIndex;
+    if (needMoveToLeft) {
+        const steps = currentIndex - targetIndex;
+        if (steps > 0) {
+            console.log(`Move Tab to the left to "${steps}" steps`);
+            await vscode.commands.executeCommand('moveActiveEditor', { to: 'left', by: 'tab', value: steps });
+        }
+    } else {
+        const steps = (targetIndex - 1) - currentIndex;
+        if (steps > 0) {
+            console.log(`Move Tab to the right to "${steps}" steps`);
+            await vscode.commands.executeCommand('moveActiveEditor', { to: 'right', by: 'tab', value: steps });
+        }
+    }
+    await vscode.commands.executeCommand('workbench.action.keepEditor');
+}
+
 async function groupTabs(activeEditor: vscode.TextEditor) {
     const doc = activeEditor.document;
     const isFile = doc.uri.scheme === 'file';
@@ -65,18 +119,13 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
         return;
     }
 
-    const currentExt = path.extname(doc.fileName).toLowerCase();
+    const currentPath = doc.fileName;
+    const currentExt = path.extname(currentPath).toLowerCase();
     const supportedFile = PAIR_EXTENSIONS[currentExt];
 
     if (!supportedFile) {
         return;
     }
-
-    const currentDir = path.dirname(doc.fileName);
-    const currentFullname = path.join(currentDir, path.basename(doc.fileName, currentExt));
-
-    let pairTab: vscode.Tab | undefined;
-    let position: Position | undefined;
 
     for (const tab of activeTabGroup.tabs) {
         const skipSelf = tab === currentTab;
@@ -87,59 +136,11 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
         if (!(tab.input instanceof vscode.TabInputText)) {
             continue;
         }
-        const tabPath = tab.input.uri.fsPath;
-        const tabDir = path.dirname(tabPath);
-        if (tabDir !== currentDir) {
-            continue;
-        }
 
-        const tabExt = path.extname(tabPath).toLowerCase();
-        const tabFullname = path.join(tabDir, path.basename(tabPath, tabExt));
-        if (tabFullname !== currentFullname) {
-            continue;
-        }
-        const pair = supportedFile.find(pair => pair[0] == tabExt);
-        if (!pair) {
-            continue;
-        }
-        pairTab = tab;
-        position = pair[1];
-        break;
-    }
-
-    if (pairTab == undefined || position == undefined) {
-        return;
-    }
-
-    const currentIndex = activeTabGroup.tabs.indexOf(currentTab);
-    const pairIndex = activeTabGroup.tabs.indexOf(pairTab);
-
-    let targetIndex;
-    switch (position) {
-        case Position.Left:
-            targetIndex = pairIndex + 1;
+        const position = getPosition(supportedFile, currentPath, tab.input.uri.fsPath);
+        if (position != undefined) {
+            await moveTab(activeTabGroup, currentTab, tab, position);
             break;
-        default:
-            targetIndex = pairIndex;
-            break;
-    }
-
-    const needMoveToLeft = currentIndex > targetIndex;
-    if (currentIndex == targetIndex) {
-        await vscode.commands.executeCommand('workbench.action.keepEditor');
-    } else if (needMoveToLeft) {
-        const steps = currentIndex - targetIndex;
-        if (steps > 0) {
-            console.log(`Move Tab to the left to "${steps}" steps`);
-            await vscode.commands.executeCommand('moveActiveEditor', { to: 'left', by: 'tab', value: steps });
-            await vscode.commands.executeCommand('workbench.action.keepEditor');
-        }
-    } else {
-        const steps = (targetIndex - 1) - currentIndex;
-        if (steps > 0) {
-            console.log(`Move Tab to the right to "${steps}" steps`);
-            await vscode.commands.executeCommand('moveActiveEditor', { to: 'right', by: 'tab', value: steps });
-            await vscode.commands.executeCommand('workbench.action.keepEditor');
         }
     }
 }
