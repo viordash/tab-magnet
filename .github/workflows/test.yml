@@ -2,7 +2,7 @@ name: Run Tests
 
 on:
   push:
-    branches: [ "master", "flexible-match" ]
+    branches: [ "master" ]
   pull_request:
     types: [opened, reopened, synchronize]
 
