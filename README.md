@@ -45,13 +45,13 @@ Currently, there are no configurable settings. The extension uses opinionated de
 
 ## Release Notes
 
-### 1.0.0
+### 0.0.1
 
 Initial release.
 *   Core functionality implemented.
 *   Support for C/C++, Web (JS/TS/HTML/CSS), and C# (.cs/Razor).
 
-### 1.0.1
+### 0.0.2
 
 *   **Fix:** Improved file matching to use full paths. This prevents incorrect grouping when multiple files share the same name in different folders.
 *   **Fix:** Resolved tab positioning logic issues.
