@@ -55,7 +55,7 @@ export function getPosition(pairInfo: Pair[], currentPath: string, tabPath: stri
     if (tabFullname !== currentFullname) {
         return;
     }
-    const pair = pairInfo.find(pair => pair[0] == tabExt);
+    const pair = pairInfo.find(pair => pair[0] === tabExt);
     if (!pair) {
         return;
     }

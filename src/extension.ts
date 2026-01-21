@@ -84,7 +84,7 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
         }
 
         const position = getPosition(supportedPair, doc.fileName, tab.input.uri.fsPath);
-        if (position != undefined) {
+        if (position !== undefined) {
             await moveTab(activeTabGroup, currentTab, tab, position);
             break;
         }
