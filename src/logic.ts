@@ -22,6 +22,10 @@ export const PAIR_EXTENSIONS: { [key: string]: Pairs } = {
         '.c': { position: Position.Left, patterns: [".", "..", "../src"] },
         '.cpp': { position: Position.Left, patterns: [".", "..", "../src"] }
     },
+    '.hpp': {
+        '.c': { position: Position.Left, patterns: [".", "..", "../src"] },
+        '.cpp': { position: Position.Left, patterns: [".", "..", "../src"] }
+    },
 
     // --- Web (JS / TS / HTML / CSS) ---
     '.js': {
