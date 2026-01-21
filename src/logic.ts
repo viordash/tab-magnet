@@ -1,63 +1,106 @@
 import * as path from 'path';
+import { minimatch } from 'minimatch';
 
 export enum Position {
     Left,
     Right
 }
 
-export type Pair = [string, Position];
+type Pair = { position: Position; patterns: string[] };
+type Pairs = { [key: string]: Pair };
 
-export const PAIR_EXTENSIONS: { [key: string]: Pair[] } = {
-    // C/C++
-    '.c': [['.h', Position.Right]],
-    '.h': [['.c', Position.Left], ['.cpp', Position.Left]],
-    '.cpp': [['.hpp', Position.Right], ['.h', Position.Right], ['.hxx', Position.Right]],
-    '.hpp': [['.c', Position.Left], ['.cpp', Position.Left]],
-    '.cc': [['.hh', Position.Right], ['.h', Position.Right]],
-    '.hh': [['.cc', Position.Left]],
+export const PAIR_EXTENSIONS: { [key: string]: Pairs } = {
+    // --- C / C++ ---
+    '.cpp': {
+        '.h': { position: Position.Right, patterns: [".", "include", "../include"] },
+        '.hpp': { position: Position.Right, patterns: [".", "include", "../include"] }
+    },
+    '.c': {
+        '.h': { position: Position.Right, patterns: [".", "include", "../include"] }
+    },
+    '.h': {
+        '.c': { position: Position.Left, patterns: [".", "..", "../src"] },
+        '.cpp': { position: Position.Left, patterns: [".", "..", "../src"] }
+    },
 
-    // Web
-    '.js': [['.css', Position.Right], ['.html', Position.Right], ['.ts', Position.Left]],
-    '.ts': [['.css', Position.Right], ['.html', Position.Right], ['.spec.ts', Position.Right]],
-    '.html': [['.css', Position.Left], ['.ts', Position.Left], ['js', Position.Left]],
-    '.css': [['.html', Position.Left], ['.ts', Position.Left], ['js', Position.Left]],
+    // --- Web (JS / TS / HTML / CSS) ---
+    '.js': {
+        '.css': { position: Position.Right, patterns: ["."] },
+        '.html': { position: Position.Right, patterns: ["."] },
+        '.ts': { position: Position.Left, patterns: ["."] }
+    },
+    '.ts': {
+        '.css': { position: Position.Right, patterns: ["."] },
+        '.html': { position: Position.Right, patterns: ["."] },
+        '.ts': { position: Position.Right, patterns: ["test"] },
+    },
+    '.html': {
+        '.css': { position: Position.Right, patterns: ["."] },
+        '.ts': { position: Position.Left, patterns: ["."] },
+        '.js': { position: Position.Left, patterns: ["."] }
+    },
+    '.css': {
+        '.html': { position: Position.Left, patterns: ["."] },
+        '.ts': { position: Position.Left, patterns: ["."] },
+        '.js': { position: Position.Left, patterns: ["."] }
+    },
 
-    // C# / Razor
-    '.cs': [['.cshtml', Position.Right], ['.razor', Position.Right]],
-    '.cshtml': [['.cs', Position.Left], ['.razor', Position.Left]],
-    '.razor': [['.cs', Position.Left], ['.cshtml', Position.Left]],
+    // --- C# / .NET ---
+    '.cs': {
+        '.cshtml': { position: Position.Right, patterns: ["."] },
+        '.razor': { position: Position.Right, patterns: ["."] }
+    },
+    '.cshtml': {
+        '.cs': { position: Position.Left, patterns: ["."] },
+        '.razor': { position: Position.Left, patterns: ["."] }
+    },
+    '.razor': {
+        '.cs': { position: Position.Left, patterns: ["."] },
+        '.cshtml': { position: Position.Left, patterns: ["."] }
+    }
 };
 
 
-export function getPairInfo(currentPath: string): Pair[] | undefined {
-    const currentExt = path.extname(currentPath).toLowerCase();
-    const supportedFile = PAIR_EXTENSIONS[currentExt];
-
-    if (!supportedFile) {
-        return;
-    }
-
-    return supportedFile;
+function toUnixPath(p: string): string {
+    return p.split(path.sep).join('/');
 }
 
-export function getPosition(pairInfo: Pair[], currentPath: string, tabPath: string): Position | undefined {
+export function getPairInfo(currentPath: string): Pairs | undefined {
     const currentExt = path.extname(currentPath).toLowerCase();
-    const currentDir = path.dirname(currentPath);
-    const currentFullname = path.join(currentDir, path.basename(currentPath, currentExt));
+    return PAIR_EXTENSIONS[currentExt];
+}
 
-    const tabDir = path.dirname(tabPath);
-    if (tabDir !== currentDir) {
-        return;
-    }
+export function getPosition(pairInfo: Pairs, currentPath: string, tabPath: string): Position | undefined {
+    const currentExt = path.extname(currentPath).toLowerCase();
+    const currentName = path.basename(currentPath, currentExt);
 
     const tabExt = path.extname(tabPath).toLowerCase();
-    const tabFullname = path.join(tabDir, path.basename(tabPath, tabExt));
-    if (tabFullname !== currentFullname) {
-        return;
+    const tabName = path.basename(tabPath, tabExt);
+
+    if (currentName !== tabName) {
+        return undefined;
     }
-    const pair = pairInfo.find(pair => pair[0] === tabExt);
+
+    const pair = pairInfo[tabExt];
     if (!pair) {
-        return;
+        return undefined;
     }
-    return pair[1];
+
+    const currentDir = path.dirname(currentPath);
+    const tabDir = path.dirname(tabPath);
+
+    let relativePath = path.relative(currentDir, tabDir);
+    if (!relativePath) {
+        relativePath = '.';
+    }
+
+    const normalizedRelative = toUnixPath(relativePath);
+
+    for (const pattern of pair.patterns) {
+        if (minimatch(normalizedRelative, pattern)) {
+            return pair.position;
+        }
+    }
+
+    return undefined;
 }
