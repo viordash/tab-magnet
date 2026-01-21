@@ -1,4 +1,7 @@
-# vscode extension Tab Magnet
+[![Deploy Extension](https://github.com/viordash/tab-magnet/actions/workflows/deploy.yml/badge.svg)](https://github.com/viordash/tab-magnet/actions/workflows/deploy.yml)
+
+# Tab Magnet
+vscode extension
 
 **Tab Magnet** automatically keeps your related file tabs together.
 
@@ -7,7 +10,7 @@ When you work with languages that use pairs of files (like C++ Header/Source, or
 ## Features
 
 *   **Automatic Grouping:** Just open a file or switch to an existing tab. If a related file is found in the current group, they will "snap" together.
-*   **Smart Positioning:** The extension knows where files usually belong. For example, Header files (`.h`) are placed to the **Left** of Source files (`.c`), while CSS files are placed to the **Right** of HTML/JS files.
+*   **Smart Positioning:** The extension knows where files usually belong. For example, Header files (`.h`) are placed to the **Right** of Source files (`.c`), while HTML/JS files are placed to the **Left** of CSS files.
 *   **Zero Configuration:** Works out of the box.
 
 ## Supported File Pairs
@@ -42,8 +45,16 @@ Currently, there are no configurable settings. The extension uses opinionated de
 
 ## Release Notes
 
-### 1.0.0
+### 0.0.1
 
 Initial release.
 *   Core functionality implemented.
 *   Support for C/C++, Web (JS/TS/HTML/CSS), and C# (.cs/Razor).
+
+### 0.0.2
+
+*   **Fix:** Improved file matching to use full paths. This prevents incorrect grouping when multiple files share the same name in different folders.
+*   **Fix:** Resolved tab positioning logic issues.
+*   **Improvement:** Tabs are now automatically pinned (`keepEditor`) after grouping to ensure stable layout.
+*   Added GitHub Actions workflow for automatic deployment.
+*   Updated documentation.
