@@ -2,7 +2,7 @@
   "name": "tab-magnet",
   "displayName": "Tab Magnet",
   "description": "Automatically groups related file tabs (e.g., .c/.h, .cpp/.hpp, .js/.css) side-by-side active editor.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "viordash",
   "repository": {
     "type": "git",
