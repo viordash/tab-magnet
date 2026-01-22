@@ -3,7 +3,7 @@ import { Position, getPairPattern, getPosition } from '../logic';
 
 
 suite('getPosition Logic Tests', () => {
-    test('Sibling', () => {
+    test('C++ Sibling: Source (.cpp) and Header (.h) in same folder', () => {
         const majorFile = '/src/file.cpp';
         const minorFile = '/src/file.h';
         const pairs = [{ left: '$(name).cpp', right: '$(name).h' }];
@@ -16,7 +16,7 @@ suite('getPosition Logic Tests', () => {
         assert.strictEqual(getPosition(pairs, '/src/File.h', majorFile), undefined);
     });
 
-    test('Sibling2', () => {
+    test('C++ Sibling: Deeply nested Source and Header', () => {
         const majorFile = '/src/folder1/folder2/file.cpp';
         const minorFile = '/src/folder1/folder2/file.h';
         const pairs = [{ left: '$(name).cpp', right: '$(name).h' }];
@@ -29,7 +29,7 @@ suite('getPosition Logic Tests', () => {
         assert.strictEqual(getPosition(pairs, '/src/folder1/folder2/File.h', majorFile), undefined);
     });
 
-    test('Cousin', () => {
+    test('Pattern Match: Cousin folders using wildcard (*/$(name))', () => {
         const majorFile = '/src1/file.cpp';
         const minorFile = '/src2/file.h';
         const pairs = [{ left: '*/$(name).cpp', right: '*/$(name).h' }];
@@ -42,7 +42,7 @@ suite('getPosition Logic Tests', () => {
         assert.strictEqual(getPosition(pairs, '/src/File.h', majorFile), undefined);
     });
 
-    test('Cousin2', () => {
+    test('Pattern Match: Deeply nested Cousin folders using wildcard', () => {
         const majorFile = '/project/folder1/folder2/src1/file.cpp';
         const minorFile = '/project/folder1/folder2/src2/file.h';
         const pairs = [{ left: '*/$(name).cpp', right: '*/$(name).h' }];
@@ -55,7 +55,7 @@ suite('getPosition Logic Tests', () => {
         assert.strictEqual(getPosition(pairs, '/project/src/File.h', majorFile), undefined);
     });
 
-    test('Nephew (Include)', () => {
+    test('C++ Structure: Header in "include" subdirectory', () => {
         const majorFile = '/src/file.cpp';
         const minorFile = '/src/include/file.h';
         const pairs = [{ left: '$(name).cpp', right: 'include/$(name).h' }];
@@ -68,7 +68,7 @@ suite('getPosition Logic Tests', () => {
         assert.strictEqual(getPosition(pairs, '/src/Include/file.h', majorFile), undefined);
     });
 
-    test('Second cousins (exact pattern)', () => {
+    test('Complex Path: Distinct "library" and "include" trees (Exact Pattern)', () => {
         const majorFile = "~/Test/library/SpiLib/SpiLib.cpp";
         const minorFile = "~/Test/include/library/SpiLib.h";
         const pairs = [{ left: 'library/SpiLib/$(name).cpp', right: 'include/library/$(name).h' }];
@@ -79,7 +79,7 @@ suite('getPosition Logic Tests', () => {
         assert.strictEqual(getPosition(pairs, '/SpiLib.cpp', minorFile), undefined);
     });
 
-    test('Second cousins (* pattern)', () => {
+    test('Complex Path: Distinct trees using wildcard (*)', () => {
         const majorFile = "~/Test/library/SpiLib/SpiLib.cpp";
         const minorFile = "~/Test/include/library/SpiLib.h";
         const pairs = [{ left: 'library/SpiLib/$(name).cpp', right: 'include/*/$(name).h' }];
@@ -90,7 +90,7 @@ suite('getPosition Logic Tests', () => {
         assert.strictEqual(getPosition(pairs, '/SpiLib.cpp', minorFile), undefined);
     });
 
-    test('Suffix in name', () => {
+    test('TypeScript: Source (.ts) and Spec (.spec.ts) in same folder', () => {
         const majorFile = "/src/component.ts";
         const minorFile = "/src/component.spec.ts";
         const pairs = [{ left: '$(name).ts', right: '$(name).spec.ts' }];
@@ -101,7 +101,7 @@ suite('getPosition Logic Tests', () => {
         assert.strictEqual(getPosition(pairs, '/component.ts', minorFile), undefined);
     });
 
-    test('Suffix in name, nephew (test)', () => {
+    test('TypeScript: Spec (.spec.ts) in "test" subfolder', () => {
         const majorFile = "/src/component.ts";
         const minorFile = "/src/test/component.spec.ts";
         const pairs = [{ left: '$(name).ts', right: 'test/$(name).spec.ts' }];
@@ -112,7 +112,7 @@ suite('getPosition Logic Tests', () => {
         assert.strictEqual(getPosition(pairs, '/component.ts', minorFile), undefined);
     });
 
-    test('Suffix+ext and ext', () => {
+    test('C# WPF: Code-behind (.xaml.cs) and XAML (.xaml)', () => {
         const majorFile = "/src/MainWindow.xaml.cs";
         const minorFile = "/src/MainWindow.xaml";
         const pairs = [{ left: '$(name).xaml.cs', right: '$(name).xaml' }];
@@ -123,7 +123,7 @@ suite('getPosition Logic Tests', () => {
         assert.strictEqual(getPosition(pairs, '/MainWindow.xaml.cs', minorFile), undefined);
     });
 
-    test('Header in include', () => {
+    test('Integration: C++ Header in "include" subfolder', () => {
         const majorFile = '/lib/file.cpp';
         const minorFile = '/lib/include/file.h';
         {
@@ -136,7 +136,7 @@ suite('getPosition Logic Tests', () => {
         }
     });
 
-    test('Parent sibling match (../include)', () => {
+    test('Integration: C++ "src" vs "include" sibling folders (Legacy pattern check)', () => {
         const majorFile = '/proj/src/file.cpp';
         const minorFile = '/proj/include/file.h';
         {
@@ -149,7 +149,7 @@ suite('getPosition Logic Tests', () => {
         }
     });
 
-    test('Recursive match (../**/include)', () => {
+    test('Integration: Deep folder matching using standard patterns', () => {
         const majorFile = '/proj/src/sub/file.cpp';
         const minorFile = '/proj/src/include/file.h';
         {
@@ -162,14 +162,14 @@ suite('getPosition Logic Tests', () => {
         }
     });
 
-    test('Mismatch returns undefined', () => {
+    test('Negative: Unrelated files return undefined', () => {
         const pos = getPosition(getPairPattern('/src/file.cpp'), '/src/file.cpp', '/other/file1.h');
         assert.strictEqual(pos, undefined);
     });
 
     // --- WEB TESTS (JS, TS, HTML, CSS) ---
 
-    test('Web: HTML and CSS sibling', () => {
+    test('Integration: Web HTML and CSS sibling', () => {
         const majorFile = '/app/components/Header.html';
         const minorFile = '/app/components/Header.css';
 
@@ -183,7 +183,7 @@ suite('getPosition Logic Tests', () => {
         }
     });
 
-    test('Web: TS and HTML sibling', () => {
+    test('Integration: Web TS and HTML sibling', () => {
         const majorFile = '/app/login/Login.ts';
         const minorFile = '/app/login/Login.html';
 
@@ -197,7 +197,7 @@ suite('getPosition Logic Tests', () => {
         }
     });
 
-    test('Web: JS and CSS sibling', () => {
+    test('Integration: Web JS and CSS sibling', () => {
         const majorFile = '/static/script.js';
         const minorFile = '/static/script.css';
 
@@ -211,23 +211,7 @@ suite('getPosition Logic Tests', () => {
         }
     });
 
-    test('Web: TS and HTML Angular component', () => {
-        const majorFile = '/app/main/main.component.ts';
-        const minorFile = '/app/main/main.component.html';
-
-        {
-            const pos = getPosition(getPairPattern(majorFile), majorFile, minorFile);
-            assert.strictEqual(pos, Position.Left);
-        }
-        {
-            const pos = getPosition(getPairPattern(minorFile), minorFile, majorFile);
-            assert.strictEqual(pos, Position.Right);
-        }
-    });
-
-    // // --- TYPESCRIPT TEST FOLDER ---
-
-    test('TypeScript: Source and Test in subfolder', () => {
+    test('Integration: TypeScript Source and Test in subfolder', () => {
         const majorFile = '/project/src/logic.ts';
         const minorFile = '/project/src/test/logic.ts';
 
@@ -243,7 +227,7 @@ suite('getPosition Logic Tests', () => {
 
     // --- C# / .NET TESTS ---
 
-    test('C#: CS and CSHTML (Razor Pages)', () => {
+    test('Integration: C# Razor Pages (.cs and .cshtml)', () => {
         const majorFile = '/Pages/Index.cs';
         const minorFile = '/Pages/Index.cshtml';
 
@@ -257,7 +241,7 @@ suite('getPosition Logic Tests', () => {
         }
     });
 
-    test('C#: CS and Razor (Blazor)', () => {
+    test('Integration: C# Blazor (.cs and .razor)', () => {
         const majorFile = '/Components/Counter.cs';
         const minorFile = '/Components/Counter.razor';
 
@@ -271,5 +255,23 @@ suite('getPosition Logic Tests', () => {
         }
     });
 
-});
+    // --- NEW TESTS FOR ANGULAR / MULTI-EXTENSION ---
+    
+    test('Angular Component: Multi-dot extension stripping (hero.component.ts -> hero)', () => {
+        const majorFile = '/app/hero.component.ts';
+        const minorFile = '/app/hero.component.html';
+        
+        // This relies on getFileName stripping BOTH .ts and .component
+        // and matching against { left: '$(name).component.ts', right: '$(name).component.html' }
+        
+        {
+            const pos = getPosition(getPairPattern(majorFile), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
 
+});
