@@ -1,9 +1,18 @@
 import * as vscode from 'vscode';
-import { getPairPattern, getPosition, Position } from './logic';
+import { getPairPattern, getPosition, Position, PairPattern, DEFAULT_PAIR_PATTERNS } from './logic';
 
+let activeRules: PairPattern[] = [];
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('Tab Magnet is active');
+
+    updateRules();
+
+    context.subscriptions.push(vscode.workspace.onDidChangeConfiguration(e => {
+        if (e.affectsConfiguration('tabMagnet.rules')) {
+            updateRules();
+        }
+    }));
 
     let disposable = vscode.window.onDidChangeActiveTextEditor(async (editor) => {
         if (!editor) {
@@ -13,6 +22,15 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     context.subscriptions.push(disposable);
+}
+
+function updateRules() {
+    const config = vscode.workspace.getConfiguration('tabMagnet');
+    const userRules = config.get<PairPattern[]>('rules') || [];
+
+    activeRules = [...userRules, ...DEFAULT_PAIR_PATTERNS];
+
+    console.log(`Tab Magnet rules updated. Total rules: ${activeRules.length} (User: ${userRules.length})`);
 }
 
 export async function moveTab(tabGroup: vscode.TabGroup, currentTab: vscode.Tab, pairTab: vscode.Tab, position: Position) {
@@ -47,7 +65,6 @@ export async function moveTab(tabGroup: vscode.TabGroup, currentTab: vscode.Tab,
 }
 
 async function groupTabs(activeEditor: vscode.TextEditor) {
-
     if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
         console.error(`Root path not found!!! Exit.`);
         return;
@@ -64,7 +81,6 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
         return;
     }
 
-
     const currentTab = activeTabGroup.tabs.find(t =>
         t.input instanceof vscode.TabInputText &&
         t.input.uri.fsPath === doc.uri.fsPath
@@ -74,7 +90,8 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
         return;
     }
 
-    const supportedPair = getPairPattern(doc.fileName);
+    // ВАЖНО: Передаем activeRules вместо глобальной константы
+    const supportedPair = getPairPattern(doc.fileName, activeRules);
     if (supportedPair.length === 0) {
         return;
     }

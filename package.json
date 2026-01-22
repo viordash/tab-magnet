@@ -26,7 +26,33 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": []
+    "configuration": {
+      "title": "Tab Magnet",
+      "properties": {
+        "tabMagnet.rules": {
+          "type": "array",
+          "default": [],
+          "description": "Custom pairing rules. These rules take precedence over built-in defaults.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "left": {
+                "type": "string",
+                "description": "Pattern for the 'Main' file (e.g. $(name).c)"
+              },
+              "right": {
+                "type": "string",
+                "description": "Pattern for the 'Related' file (e.g. include/$(name).h)"
+              }
+            },
+            "required": [
+              "left",
+              "right"
+            ]
+          }
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { Position, getPairPattern, getPosition } from '../logic';
+import { DEFAULT_PAIR_PATTERNS, Position, getPairPattern, getPosition } from '../logic';
 
 
 suite('getPosition Logic Tests', () => {
@@ -127,11 +127,11 @@ suite('getPosition Logic Tests', () => {
         const majorFile = '/lib/file.cpp';
         const minorFile = '/lib/include/file.h';
         {
-            const pos = getPosition(getPairPattern(majorFile), majorFile, minorFile);
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
             assert.strictEqual(pos, Position.Left);
         }
         {
-            const pos = getPosition(getPairPattern(minorFile), minorFile, majorFile);
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
             assert.strictEqual(pos, Position.Right);
         }
     });
@@ -140,11 +140,11 @@ suite('getPosition Logic Tests', () => {
         const majorFile = '/proj/src/file.cpp';
         const minorFile = '/proj/include/file.h';
         {
-            const pos = getPosition(getPairPattern(majorFile), majorFile, minorFile);
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
             assert.strictEqual(pos, Position.Left);
         }
         {
-            const pos = getPosition(getPairPattern(minorFile), minorFile, majorFile);
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
             assert.strictEqual(pos, Position.Right);
         }
     });
@@ -153,17 +153,17 @@ suite('getPosition Logic Tests', () => {
         const majorFile = '/proj/src/sub/file.cpp';
         const minorFile = '/proj/src/include/file.h';
         {
-            const pos = getPosition(getPairPattern(majorFile), majorFile, minorFile);
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
             assert.strictEqual(pos, Position.Left);
         }
         {
-            const pos = getPosition(getPairPattern(minorFile), minorFile, majorFile);
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
             assert.strictEqual(pos, Position.Right);
         }
     });
 
     test('Negative: Unrelated files return undefined', () => {
-        const pos = getPosition(getPairPattern('/src/file.cpp'), '/src/file.cpp', '/other/file1.h');
+        const pos = getPosition(getPairPattern('/src/file.cpp', DEFAULT_PAIR_PATTERNS), '/src/file.cpp', '/other/file1.h');
         assert.strictEqual(pos, undefined);
     });
 
@@ -174,11 +174,11 @@ suite('getPosition Logic Tests', () => {
         const minorFile = '/app/components/Header.css';
 
         {
-            const pos = getPosition(getPairPattern(majorFile), majorFile, minorFile);
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
             assert.strictEqual(pos, Position.Left);
         }
         {
-            const pos = getPosition(getPairPattern(minorFile), minorFile, majorFile);
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
             assert.strictEqual(pos, Position.Right);
         }
     });
@@ -188,11 +188,11 @@ suite('getPosition Logic Tests', () => {
         const minorFile = '/app/login/Login.html';
 
         {
-            const pos = getPosition(getPairPattern(majorFile), majorFile, minorFile);
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
             assert.strictEqual(pos, Position.Left);
         }
         {
-            const pos = getPosition(getPairPattern(minorFile), minorFile, majorFile);
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
             assert.strictEqual(pos, Position.Right);
         }
     });
@@ -202,11 +202,11 @@ suite('getPosition Logic Tests', () => {
         const minorFile = '/static/script.css';
 
         {
-            const pos = getPosition(getPairPattern(majorFile), majorFile, minorFile);
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
             assert.strictEqual(pos, Position.Left);
         }
         {
-            const pos = getPosition(getPairPattern(minorFile), minorFile, majorFile);
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
             assert.strictEqual(pos, Position.Right);
         }
     });
@@ -216,11 +216,11 @@ suite('getPosition Logic Tests', () => {
         const minorFile = '/project/src/test/logic.ts';
 
         {
-            const pos = getPosition(getPairPattern(majorFile), majorFile, minorFile);
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
             assert.strictEqual(pos, Position.Left);
         }
         {
-            const pos = getPosition(getPairPattern(minorFile), minorFile, majorFile);
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
             assert.strictEqual(pos, Position.Right);
         }
     });
@@ -232,11 +232,11 @@ suite('getPosition Logic Tests', () => {
         const minorFile = '/Pages/Index.cshtml';
 
         {
-            const pos = getPosition(getPairPattern(majorFile), majorFile, minorFile);
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
             assert.strictEqual(pos, Position.Left);
         }
         {
-            const pos = getPosition(getPairPattern(minorFile), minorFile, majorFile);
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
             assert.strictEqual(pos, Position.Right);
         }
     });
@@ -246,30 +246,30 @@ suite('getPosition Logic Tests', () => {
         const minorFile = '/Components/Counter.razor';
 
         {
-            const pos = getPosition(getPairPattern(majorFile), majorFile, minorFile);
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
             assert.strictEqual(pos, Position.Left);
         }
         {
-            const pos = getPosition(getPairPattern(minorFile), minorFile, majorFile);
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
             assert.strictEqual(pos, Position.Right);
         }
     });
 
-    // --- NEW TESTS FOR ANGULAR / MULTI-EXTENSION ---
-    
+    // --- ANGULAR / MULTI-EXTENSION ---
+
     test('Angular Component: Multi-dot extension stripping (hero.component.ts -> hero)', () => {
         const majorFile = '/app/hero.component.ts';
         const minorFile = '/app/hero.component.html';
-        
+
         // This relies on getFileName stripping BOTH .ts and .component
         // and matching against { left: '$(name).component.ts', right: '$(name).component.html' }
-        
+
         {
-            const pos = getPosition(getPairPattern(majorFile), majorFile, minorFile);
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
             assert.strictEqual(pos, Position.Left);
         }
         {
-            const pos = getPosition(getPairPattern(minorFile), minorFile, majorFile);
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
             assert.strictEqual(pos, Position.Right);
         }
     });

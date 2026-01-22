@@ -6,8 +6,8 @@ export enum Position {
     Right
 }
 
-type PairPattern = { left: string; right: string };
-export const PAIR_PATTERNS: PairPattern[] = [
+export type PairPattern = { left: string; right: string };
+export const DEFAULT_PAIR_PATTERNS: PairPattern[] = [
     // C/C++ (Sibling)
     { left: '$(name).c', right: '$(name).h' },
     { left: '$(name).cpp', right: '$(name).h' },
@@ -50,9 +50,10 @@ function toUnix(p: string): string {
     return p.split(path.sep).join('/');
 }
 
-export function getPairPattern(currentPath: string): PairPattern[] {
+export function getPairPattern(currentPath: string, rules: PairPattern[]): PairPattern[] {
     const currentExt = path.extname(currentPath).toLowerCase();
-    const pairs = PAIR_PATTERNS.filter(pat => path.extname(pat.left) === currentExt || path.extname(pat.right) === currentExt);
+    const pairs = rules.filter(pat => path.extname(pat.left) === currentExt
+        || path.extname(pat.right) === currentExt);
     return pairs;
 }
 
