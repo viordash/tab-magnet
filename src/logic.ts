@@ -23,13 +23,18 @@ export const PAIR_PATTERNS: PairPattern[] = [
     { left: '$(name).cpp', right: 'include/$(name).h' },
     { left: '$(name).cpp', right: 'include/$(name).hpp' },
 
-    // Typescript / Web
-    { left: '$(name).ts', right: '$(name).spec.ts' },
-    { left: '$(name).ts', right: 'test/$(name).spec.ts' },
-    { left: '$(name).ts', right: 'test/$(name).ts' },
-    { left: '$(name).ts', right: 'test/$(name).ts' },
+    // Typescript / Angular
     { left: '$(name).component.ts', right: '$(name).component.html' },
+    { left: '$(name).component.ts', right: '$(name).component.scss' },
+    { left: '$(name).component.html', right: '$(name).component.scss' },
+    { left: '$(name).component.ts', right: '$(name).component.spec.ts' },
 
+    // Typescript / Tests
+    { left: '$(name).ts', right: '$(name).spec.ts' },
+    { left: '$(name).ts', right: 'test/$(name).ts' },
+    { left: '$(name).ts', right: 'test/$(name).test.ts' },
+
+    // Typescript / Web
     { left: '$(name).ts', right: '$(name).html' },
     { left: '$(name).ts', right: '$(name).css' },
     { left: '$(name).html', right: '$(name).css' },
