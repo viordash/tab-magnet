@@ -22,10 +22,10 @@ export async function moveTab(tabGroup: vscode.TabGroup, currentTab: vscode.Tab,
     let targetIndex;
     switch (position) {
         case Position.Left:
-            targetIndex = pairIndex + 1;
+            targetIndex = pairIndex;
             break;
         default:
-            targetIndex = pairIndex;
+            targetIndex = pairIndex + 1;
             break;
     }
 
