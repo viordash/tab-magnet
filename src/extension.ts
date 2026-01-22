@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getPairInfo, getPosition, Position } from './logic';
+import { getPairPattern, getPosition, Position } from './logic';
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -47,6 +47,13 @@ export async function moveTab(tabGroup: vscode.TabGroup, currentTab: vscode.Tab,
 }
 
 async function groupTabs(activeEditor: vscode.TextEditor) {
+
+    if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length == 0) {
+        console.error(`Root path not found!!! Exit.`);
+        return;
+    }
+    const rootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+
     const doc = activeEditor.document;
     const isFile = doc.uri.scheme === 'file';
     if (!isFile) {
@@ -68,8 +75,8 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
         return;
     }
 
-    const supportedPair = getPairInfo(doc.fileName);
-    if (!supportedPair) {
+    const supportedPair = getPairPattern(doc.fileName);
+    if (supportedPair.length === 0) {
         return;
     }
 
@@ -83,7 +90,7 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
             continue;
         }
 
-        const position = getPosition(supportedPair, doc.fileName, tab.input.uri.fsPath);
+        const position = getPosition(supportedPair, doc.fileName, tab.input.uri.fsPath, rootPath);
         if (position !== undefined) {
             await moveTab(activeTabGroup, currentTab, tab, position);
             break;
