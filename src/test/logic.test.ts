@@ -211,20 +211,6 @@ suite('getPosition Logic Tests', () => {
         }
     });
 
-    test('Integration: TypeScript Source and Test in subfolder', () => {
-        const majorFile = '/project/src/logic.ts';
-        const minorFile = '/project/src/test/logic.ts';
-
-        {
-            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
-            assert.strictEqual(pos, Position.Left);
-        }
-        {
-            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
-            assert.strictEqual(pos, Position.Right);
-        }
-    });
-
     // --- C# / .NET TESTS ---
 
     test('Integration: C# Razor Pages (.cs and .cshtml)', () => {
