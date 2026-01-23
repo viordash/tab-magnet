@@ -35,21 +35,17 @@ Tab Magnet works out of the box for:
 
 ## Extension Settings
 
-You can add custom pairing rules using the `tabMagnet.rules` setting in your `settings.json`. User rules take precedence over built-in defaults.
+You can define your own pairing rules using the `tabMagnet.rules` setting in your `settings.json`.
 
-Use the `$(name)` placeholder to match the filename (without extension).
+**Important:** If you define custom rules, **built-in defaults will be disabled**. This gives you full control and prevents conflicts with standard patterns.
 
-### Example 1: Go Lang tests
-```json
-"tabMagnet.rules": [
-    { 
-        "left": "$(name).go", 
-        "right": "$(name)_test.go" 
-    }
-]
-```
+The extension matches files by stripping all extensions and comparing the base names.
+Use the `$(name)` placeholder to match this base name.
 
-### Example 2: React Native (JS + Styles)
+If you want to add a new rule but keep built-in support, you must copy the default rules you need into your settings.
+
+### Example 1: React Native (JS + Styles)
+Because the extension strips all suffixes (like `.styles.js`), this works automatically:
 ```json
 "tabMagnet.rules": [
     { 
@@ -59,13 +55,13 @@ Use the `$(name)` placeholder to match the filename (without extension).
 ]
 ```
 
-### Example 3: Custom C++ folder structure
-If you use a specific naming convention for tests in a separate folder:
+### Example 2: Custom C++ folder structure
+If you keep your tests in a separate `tests/` folder with the same filename:
 ```json
 "tabMagnet.rules": [
     { 
         "left": "src/$(name).cpp", 
-        "right": "tests/Test_$(name).cpp" 
+        "right": "tests/$(name).cpp" 
     }
 ]
 ```
