@@ -3,7 +3,7 @@
 {
 	"version": "2.0.0",
 	"tasks": [
-		{
+        {
             "label": "watch",
             "dependsOn": [
                 "npm: watch:tsc",
@@ -29,7 +29,7 @@
                 "reveal": "never"
             }
         },
-		{
+        {
             "type": "npm",
             "script": "watch:tsc",
             "group": "build",
@@ -40,6 +40,32 @@
                 "group": "watch",
                 "reveal": "never"
             }
+        },
+        {
+            "type": "npm",
+            "script": "watch-tests",
+            "problemMatcher": "$tsc-watch",
+            "isBackground": true,
+            "presentation": {
+                "reveal": "never",
+                "group": "watchers"
+            },
+            "group": "build"
+        },
+        {
+            "label": "tasks: watch-tests",
+            "dependsOn": [
+                "npm: watch",
+                "npm: watch-tests"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "test:unit",
+            "problemMatcher": [],
+            "label": "npm: test:unit",
+            "detail": "mocha --ui tdd out/test/logic.test.js"
         }
-	]
+    ]
 }

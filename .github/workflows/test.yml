@@ -1,0 +1,23 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        
+    - run: npm install
+    - run: npm run compile-tests
+    
+    - run: npm run test:unit

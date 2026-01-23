@@ -1,0 +1,354 @@
+import * as assert from 'assert';
+import { DEFAULT_PAIR_PATTERNS, Position, getPairPattern, getPosition } from '../logic';
+
+
+suite('getPosition Logic Tests', () => {
+    test('C++ Sibling: Source (.cpp) and Header (.h)', () => {
+        const majorFile = '/src/file.cpp';
+        const minorFile = '/src/file.h';
+        const pairs = [{ left: '$(name).cpp', right: '$(name).h' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/include/file.h'), undefined);
+        assert.strictEqual(getPosition(pairs, '/file.cpp', minorFile), undefined);
+        assert.strictEqual(getPosition(pairs, '/src/File.cpp', minorFile), undefined);
+        assert.strictEqual(getPosition(pairs, '/src/File.h', majorFile), undefined);
+    });
+
+    test('C++ Sibling: Deeply nested paths', () => {
+        const majorFile = '/src/folder1/folder2/file.cpp';
+        const minorFile = '/src/folder1/folder2/file.h';
+        const pairs = [{ left: '$(name).cpp', right: '$(name).h' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/include/file.h'), undefined);
+        assert.strictEqual(getPosition(pairs, '/file.cpp', minorFile), undefined);
+        assert.strictEqual(getPosition(pairs, '/src/folder1/folder2/File.cpp', minorFile), undefined);
+        assert.strictEqual(getPosition(pairs, '/src/folder1/folder2/File.h', majorFile), undefined);
+    });
+
+    test('Pattern Match: Cousin folders using wildcard (*/$(name))', () => {
+        const majorFile = '/src1/file.cpp';
+        const minorFile = '/src2/file.h';
+        const pairs = [{ left: '*/$(name).cpp', right: '*/$(name).h' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/src/include/file.h'), undefined);
+        assert.strictEqual(getPosition(pairs, '/file.cpp', minorFile), undefined);
+        assert.strictEqual(getPosition(pairs, '/src/File.cpp', minorFile), undefined);
+        assert.strictEqual(getPosition(pairs, '/src/File.h', majorFile), undefined);
+    });
+
+    test('Pattern Match: Deeply nested Cousin folders using wildcard', () => {
+        const majorFile = '/project/folder1/folder2/src1/file.cpp';
+        const minorFile = '/project/folder1/folder2/src2/file.h';
+        const pairs = [{ left: '*/$(name).cpp', right: '*/$(name).h' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/project/src/include/file.h'), undefined);
+        assert.strictEqual(getPosition(pairs, '/file.cpp', minorFile), undefined);
+        assert.strictEqual(getPosition(pairs, '/project/src/File.cpp', minorFile), undefined);
+        assert.strictEqual(getPosition(pairs, '/project/src/File.h', majorFile), undefined);
+    });
+
+    test('C++ Structure: Header in "include" subdirectory', () => {
+        const majorFile = '/src/file.cpp';
+        const minorFile = '/src/include/file.h';
+        const pairs = [{ left: '$(name).cpp', right: 'include/$(name).h' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/src/file.h'), undefined);
+        assert.strictEqual(getPosition(pairs, '/file.cpp', minorFile), undefined);
+        assert.strictEqual(getPosition(pairs, '/src/File.cpp', minorFile), undefined);
+        assert.strictEqual(getPosition(pairs, '/src/Include/file.h', majorFile), undefined);
+    });
+
+    test('Complex Path: Distinct "library" and "include" trees (Exact Pattern)', () => {
+        const majorFile = "~/Test/library/SpiLib/SpiLib.cpp";
+        const minorFile = "~/Test/include/library/SpiLib.h";
+        const pairs = [{ left: 'library/SpiLib/$(name).cpp', right: 'include/library/$(name).h' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/src/SpiLib.h'), undefined);
+        assert.strictEqual(getPosition(pairs, '/SpiLib.cpp', minorFile), undefined);
+    });
+
+    test('Complex Path: Distinct trees using wildcard (*)', () => {
+        const majorFile = "~/Test/library/SpiLib/SpiLib.cpp";
+        const minorFile = "~/Test/include/library/SpiLib.h";
+        const pairs = [{ left: 'library/SpiLib/$(name).cpp', right: 'include/*/$(name).h' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/src/SpiLib.h'), undefined);
+        assert.strictEqual(getPosition(pairs, '/SpiLib.cpp', minorFile), undefined);
+    });
+
+    test('TypeScript: Source (.ts) and Spec (.spec.ts) in same folder', () => {
+        const majorFile = "/src/component.ts";
+        const minorFile = "/src/component.spec.ts";
+        const pairs = [{ left: '$(name).ts', right: '$(name).spec.ts' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/test/component.spec.ts'), undefined);
+        assert.strictEqual(getPosition(pairs, '/component.ts', minorFile), undefined);
+    });
+
+    test('TypeScript: Spec (.spec.ts) in "test" subfolder', () => {
+        const majorFile = "/src/component.ts";
+        const minorFile = "/src/test/component.spec.ts";
+        const pairs = [{ left: '$(name).ts', right: 'test/$(name).spec.ts' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/component.spec.ts'), undefined);
+        assert.strictEqual(getPosition(pairs, '/component.ts', minorFile), undefined);
+    });
+
+    test('C# WPF: Code-behind (.xaml.cs) and XAML (.xaml)', () => {
+        const majorFile = "/src/MainWindow.xaml.cs";
+        const minorFile = "/src/MainWindow.xaml";
+        const pairs = [{ left: '$(name).xaml.cs', right: '$(name).xaml' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/test/MainWindow.xaml'), undefined);
+        assert.strictEqual(getPosition(pairs, '/MainWindow.xaml.cs', minorFile), undefined);
+    });
+
+    test('Go Lang: Suffix Matching (file.go vs file_test.go)', () => {
+        const majorFile = "/client/client.go";
+        const minorFile = "/client/client_test.go";
+        const pairs = [{ left: '$(name).go', right: '$(name)_test.go' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/test/client_test.go'), undefined);
+        assert.strictEqual(getPosition(pairs, '/client.go', minorFile), undefined);
+    });
+
+    test('C++ Prefix Pattern: Test_$(name)', () => {
+        const majorFile = '/src/Engine.cpp';
+        const minorFile = '/src/tests/Test_Engine.cpp';
+        const pairs = [{ left: '$(name).cpp', right: 'tests/Test_$(name).cpp' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/src/tests/Test_Engine1.cpp'), undefined);
+        assert.strictEqual(getPosition(pairs, '/src/engine.cpp', minorFile), undefined);
+    });
+
+    test('False Positive: Partial name overlapping (view vs preview)', () => {
+        const majorFile = "/client/view.js";
+        const minorFile = "/client/view.css";
+        const pairs = [{ left: '$(name).js', right: '$(name).css' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/client/preview.css'), undefined);
+        assert.strictEqual(getPosition(pairs, '/client/preview.js', minorFile), undefined);
+    });
+});
+
+suite('Integration Tests', () => {
+    test('C++ Header in "include" subfolder', () => {
+        const majorFile = '/lib/file.cpp';
+        const minorFile = '/lib/include/file.h';
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    test('C++ .hpp support', () => {
+        const majorFile = '/src/file.cpp';
+        const minorFile = '/src/file.hpp';
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    test('C++ "src" vs "include" sibling folders', () => {
+        const majorFile = '/proj/src/file.cpp';
+        const minorFile = '/proj/include/file.h';
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    test('C++ Deep folder matching', () => {
+        const majorFile = '/proj/src/sub/file.cpp';
+        const minorFile = '/proj/src/include/file.h';
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    test('Negative: Unrelated files in unrelated paths', () => {
+        const pos = getPosition(getPairPattern('/src/file.cpp', DEFAULT_PAIR_PATTERNS), '/src/file.cpp', '/other/file1.h');
+        assert.strictEqual(pos, undefined);
+    });
+
+    // --- WEB TESTS (JS, TS, HTML, CSS) ---
+
+    test('Web HTML and CSS sibling', () => {
+        const majorFile = '/app/components/Header.html';
+        const minorFile = '/app/components/Header.css';
+
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    test('Web TS and HTML sibling', () => {
+        const majorFile = '/app/login/Login.ts';
+        const minorFile = '/app/login/Login.html';
+
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    test('Web JS and CSS sibling', () => {
+        const majorFile = '/static/script.js';
+        const minorFile = '/static/script.css';
+
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    test('TS alternative test suffix (.test.ts)', () => {
+        const majorFile = '/src/utils.ts';
+        const minorFile = '/src/test/utils.test.ts'; // Rule exists
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    // --- C# / .NET TESTS ---
+
+    test('C# Razor Pages (.cs and .cshtml)', () => {
+        const majorFile = '/Pages/Index.cs';
+        const minorFile = '/Pages/Index.cshtml';
+
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    test('C# Blazor (.cs and .razor)', () => {
+        const majorFile = '/Components/Counter.cs';
+        const minorFile = '/Components/Counter.razor';
+
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    test('C# WPF XAML integration', () => {
+        const majorFile = '/src/MainWindow.xaml.cs';
+        const minorFile = '/src/MainWindow.xaml';
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    // --- ANGULAR / MULTI-EXTENSION ---
+
+    test('Angular Component: Multi-dot extension (.component.ts vs .component.html)', () => {
+        const majorFile = '/app/hero.component.ts';
+        const minorFile = '/app/hero.component.html';
+
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    test('Angular SCSS support', () => {
+        const majorFile = '/app/hero.component.ts';
+        const minorFile = '/app/hero.component.scss';
+        {
+            const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+            assert.strictEqual(pos, Position.Left);
+        }
+        {
+            const pos = getPosition(getPairPattern(minorFile, DEFAULT_PAIR_PATTERNS), minorFile, majorFile);
+            assert.strictEqual(pos, Position.Right);
+        }
+    });
+
+    test('False Positive: Sibling pattern should not match files in different subfolders', () => {
+        const majorFile = '/src/a/a1/file.c';
+        const minorFile = '/src/b/b1/file.h';
+
+        const pos = getPosition(getPairPattern(majorFile, DEFAULT_PAIR_PATTERNS), majorFile, minorFile);
+        assert.strictEqual(pos, undefined);
+    });
+});
