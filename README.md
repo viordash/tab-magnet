@@ -1,9 +1,8 @@
 [![Deploy Extension](https://github.com/viordash/tab-magnet/actions/workflows/deploy.yml/badge.svg)](https://github.com/viordash/tab-magnet/actions/workflows/deploy.yml)
 
 # Tab Magnet
-vscode extension
 
-**Tab Magnet** automatically keeps your related file tabs together.
+**Tab Magnet** is an extension for **Visual Studio Code** that automatically keeps your related file tabs together.
 
 When you work with languages that use pairs of files (like C++ Header/Source, or Angular Component/Template), opening one file usually leaves its pair scattered somewhere else in the tab bar. **Tab Magnet** solves this by automatically moving the active tab right next to its related file.
 
