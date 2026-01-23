@@ -123,6 +123,39 @@ suite('getPosition Logic Tests', () => {
         assert.strictEqual(getPosition(pairs, '/MainWindow.xaml.cs', minorFile), undefined);
     });
 
+    test('Go Lang (Sibling)', () => {
+        const majorFile = "/client/client.go";
+        const minorFile = "/client/client_test.go";
+        const pairs = [{ left: '$(name).go', right: '$(name)_test.go' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/test/client_test.go'), undefined);
+        assert.strictEqual(getPosition(pairs, '/client.go', minorFile), undefined);
+    });
+
+    test('Prefix Pattern: Test_$(name)', () => {
+        const majorFile = '/src/Engine.cpp';
+        const minorFile = '/src/tests/Test_Engine.cpp';
+        const pairs = [{ left: '$(name).cpp', right: 'tests/Test_$(name).cpp' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/src/tests/Test_Engine1.cpp'), undefined);
+        assert.strictEqual(getPosition(pairs, '/src/engine.cpp', minorFile), undefined);
+    });
+
+    test('False Positives', () => {
+        const majorFile = "/client/view.js";
+        const minorFile = "/client/view.css";
+        const pairs = [{ left: '$(name).js', right: '$(name).css' }];
+
+        assert.strictEqual(getPosition(pairs, majorFile, minorFile), Position.Left);
+        assert.strictEqual(getPosition(pairs, minorFile, majorFile), Position.Right);
+        assert.strictEqual(getPosition(pairs, majorFile, '/client/preview.css'), undefined);
+        assert.strictEqual(getPosition(pairs, '/client/preview.js', minorFile), undefined);
+    });
+
     test('Integration: C++ Header in "include" subfolder', () => {
         const majorFile = '/lib/file.cpp';
         const minorFile = '/lib/include/file.h';

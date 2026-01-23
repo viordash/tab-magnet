@@ -98,15 +98,25 @@ export function getPosition(pairs: PairPattern[], currentPath: string, tabPath: 
     const currentFilename = getFileName(currentBaseName);
     const tabFilename = getFileName(tabBaseName);
 
-    if (currentFilename !== tabFilename) {
-        return undefined;
+    let baseName;
+    const currentPathIsBase = currentFilename.length <= tabFilename.length;
+    if (currentPathIsBase) {
+        baseName = currentFilename;
+        if (!tabFilename.includes(baseName)) {
+            return undefined;
+        }
+    } else {
+        baseName = tabFilename;
+        if (!currentFilename.includes(baseName)) {
+            return undefined;
+        }
     }
 
     const clearPaths = removeCommonPath(currentPath, tabPath);
 
     for (const pair of pairs) {
-        const leftPattern = pair.left.split('$(name)').join(currentFilename);
-        const rightPattern = pair.right.split('$(name)').join(tabFilename);
+        const leftPattern = pair.left.split('$(name)').join(baseName);
+        const rightPattern = pair.right.split('$(name)').join(baseName);
 
         if (minimatch(clearPaths[0], leftPattern) && minimatch(clearPaths[1], rightPattern)) {
             return Position.Left;

@@ -44,7 +44,17 @@ Use the `$(name)` placeholder to match this base name.
 
 If you want to add a new rule but keep built-in support, you must copy the default rules you need into your settings.
 
-### Example 1: React Native (JS + Styles)
+### Example 1: Go Lang tests
+```json
+"tabMagnet.rules": [
+    { 
+        "left": "$(name).go", 
+        "right": "$(name)_test.go" 
+    }
+]
+```
+
+### Example 2: React Native (JS + Styles)
 Because the extension strips all suffixes (like `.styles.js`), this works automatically:
 ```json
 "tabMagnet.rules": [
@@ -55,13 +65,13 @@ Because the extension strips all suffixes (like `.styles.js`), this works automa
 ]
 ```
 
-### Example 2: Custom C++ folder structure
+### Example 3: Custom C++ folder structure
 If you keep your tests in a separate `tests/` folder with the same filename:
 ```json
 "tabMagnet.rules": [
     { 
         "left": "src/$(name).cpp", 
-        "right": "tests/$(name).cpp" 
+        "right": "tests/Test_$(name).cpp" 
     }
 ]
 ```
@@ -87,5 +97,6 @@ Initial release.
 *   **New Feature:** Added `tabMagnet.rules` configuration. Users can now define custom pairing patterns.
 *   **New Feature:** Added support for **Angular** projects (`.component.ts`, `.html`, `.scss`).
 *   **Refactor:** Completely rewrote the matching logic to use flexible bidirectional patterns.
-*   **Improvement:** Better support for complex folder structures (e.g. "cousin" folders like `src/` and `include/`, or `src/` and `test/`).
+*   **Improvement:** Enhanced matching algorithm to support filenames with suffixes/prefixes (e.g. `_test.go`, `Test_File.cpp`).
+*   **Improvement:** Better support for complex folder structures (e.g. "cousin" folders like `src/` and `include/`).
 *   **Fix:** Fixed path separators handling for Windows.

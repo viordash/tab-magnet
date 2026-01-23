@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ### Changed
 - **Core Refactor:** Completely rewrote the matching logic. Replaced hardcoded maps with a bidirectional linear pattern list (`{ left, right }`).
+- **Smart Matching:** Logic now supports finding pairs even if filenames differ by suffixes or prefixes (fixing support for Go `_test.go` and C++ `Test_` patterns).
 - Improved support for complex folder structures (e.g. "cousin" folders like `src/` and `test/`) by dynamically calculating relative paths.
 
 ## [0.0.2]
