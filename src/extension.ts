@@ -69,11 +69,6 @@ export async function moveTab(tabGroup: vscode.TabGroup, currentTab: vscode.Tab,
 }
 
 async function groupTabs(activeEditor: vscode.TextEditor) {
-    if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
-        console.error(`Root path not found!!! Exit.`);
-        return;
-    }
-
     const doc = activeEditor.document;
     const isFile = doc.uri.scheme === 'file';
     if (!isFile) {
