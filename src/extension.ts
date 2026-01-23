@@ -26,11 +26,15 @@ export function activate(context: vscode.ExtensionContext) {
 
 function updateRules() {
     const config = vscode.workspace.getConfiguration('tabMagnet');
-    const userRules = config.get<PairPattern[]>('rules') || [];
-
-    activeRules = [...userRules, ...DEFAULT_PAIR_PATTERNS];
-
-    console.log(`Tab Magnet rules updated. Total rules: ${activeRules.length} (User: ${userRules.length})`);
+    const userRules = config.get<PairPattern[]>('rules');
+    
+    if (userRules && userRules.length > 0) {
+        activeRules = userRules;
+        console.log(`Tab Magnet: Custom rules active. Defaults ignored. Total rules: ${activeRules.length}`);
+    } else {
+        activeRules = DEFAULT_PAIR_PATTERNS;
+        console.log(`Tab Magnet: Default rules active. Total rules: ${activeRules.length}`);
+    }
 }
 
 export async function moveTab(tabGroup: vscode.TabGroup, currentTab: vscode.Tab, pairTab: vscode.Tab, position: Position) {
@@ -90,7 +94,6 @@ async function groupTabs(activeEditor: vscode.TextEditor) {
         return;
     }
 
-    // ВАЖНО: Передаем activeRules вместо глобальной константы
     const supportedPair = getPairPattern(doc.fileName, activeRules);
     if (supportedPair.length === 0) {
         return;

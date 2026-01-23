@@ -32,7 +32,7 @@
         "tabMagnet.rules": {
           "type": "array",
           "default": [],
-          "description": "Custom pairing rules. These rules take precedence over built-in defaults.",
+          "description": "Custom pairing rules. If defined, these rules COMPLETELEY REPLACE the built-in defaults.",
           "items": {
             "type": "object",
             "properties": {
