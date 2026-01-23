@@ -31,7 +31,6 @@ export const DEFAULT_PAIR_PATTERNS: PairPattern[] = [
 
     // Typescript / Tests
     { left: '$(name).ts', right: '$(name).spec.ts' },
-    { left: '$(name).ts', right: 'test/$(name).ts' },
     { left: '$(name).ts', right: 'test/$(name).test.ts' },
 
     // Typescript / Web
